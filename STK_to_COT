@@ -1,0 +1,42 @@
+import os
+import csv
+import xml.etree.ElementTree as ET
+
+def create_cot_xml(report_file):
+    # Create the root element of the CoT XML file
+    root = ET.Element("event")
+
+    # Read the STK report CSV file
+    with open(report_file, "r") as file:
+        reader = csv.DictReader(file)
+        report_data = list(reader)
+
+    # Extract relevant information from the STK report
+    for data in report_data:
+        time = data["Time"]
+        latitude = data["Latitude"]
+        longitude = data["Longitude"]
+
+        # Create the cotDetail element and its sub-elements
+        cot_detail = ET.SubElement(root, "cotDetail")
+        ET.SubElement(cot_detail, "uid").text = time
+        point = ET.SubElement(cot_detail, "point")
+        point.attrib["lat"] = latitude
+        point.attrib["lon"] = longitude
+
+    # Create the CoT XML file
+    cot_xml = ET.ElementTree(root)
+    cot_xml_file = os.path.splitext(report_file)[0] + ".xml"
+    cot_xml.write(cot_xml_file, encoding="utf-8", xml_declaration=True)
+
+    print(f"CoT XML file '{cot_xml_file}' created successfully.")
+
+# Specify the directory where the STK report CSV files are stored
+report_directory = "C:\Users\rjz00\OneDrive\Documents\Next Gen Fed\IRAD_631\STK_Reports"
+
+# Iterate over each STK report file in the directory
+for filename in os.listdir(report_directory):
+    if filename.endswith(".csv"):
+        report_file = os.path.join(report_directory, filename)
+        create_cot_xml(report_file)
+
