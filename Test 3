@@ -1,0 +1,57 @@
+import os
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+def create_cot_xml(gps_file, imu_file, entity_metadata_file):
+    # Read GPS and IMU data
+    gps_data = pd.read_csv(gps_file)
+    imu_data = pd.read_csv(imu_file)
+
+    # Merge GPS and IMU data using a common identifier, e.g., timestamp
+    merged_data = pd.merge(gps_data, imu_data, on="Timestamp")
+
+    # Read entity metadata
+    entity_metadata = pd.read_csv(entity_metadata_file)
+
+    # Create CoT XML for each entity
+    for index, row in entity_metadata.iterrows():
+        entity_name = row["STK_ObjectName"]
+        cot_uuid = row["CoT_UUID"]
+        cot_type = row["CoT_Type"]
+
+        # Filter data for the current entity
+        entity_data = merged_data[merged_data["Entity"] == entity_name]
+
+        # Create the CoT XML
+        root = ET.Element("event")
+        uid_element = ET.SubElement(root, "uid")
+        uid_element.text = cot_uuid
+        detail_element = ET.SubElement(root, "detail")
+        point_element = ET.SubElement(detail_element, "point")
+        point_element.attrib["lat"] = str(entity_data["Latitude"].iloc[0])
+        point_element.attrib["lon"] = str(entity_data["Longitude"].iloc[0])
+        ET.SubElement(detail_element, "ce").text = cot_type
+
+        # Write CoT XML to a file
+        cot_xml_file = f"{entity_name}_COT.xml"
+        cot_xml = ET.ElementTree(root)
+        cot_xml.write(cot_xml_file, encoding="utf-8", xml_declaration=True)
+        print(f"CoT XML file '{cot_xml_file}' created successfully.")
+
+# Specify the directory where your data files are located
+data_directory = "path/to/data/files"
+
+# Specify the input files for each entity
+entities = [
+    ("GroundVehicle1_GPS.csv", "GroundVehicle1_IMU.csv"),
+    ("GroundVehicle2_GPS.csv", "GroundVehicle2_IMU.csv"),
+    ("Aircraft1_GPS.csv", "Aircraft1_IMU.csv"),
+    ("Aircraft2_GPS.csv", "Aircraft2_IMU.csv"),
+]
+
+# Process each entity
+for gps_file, imu_file in entities:
+    entity_metadata_file = "STK_Entity_Metadata.csv"
+    create_cot_xml(os.path.join(data_directory, gps_file),
+                   os.path.join(data_directory, imu_file),
+                   os.path.join(data_directory, entity_metadata_file))
