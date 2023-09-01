@@ -1,0 +1,17 @@
+#Assumptions needed so far, there are csv files coming out of stk and they are in obj name then cot uuid and then cot type
+#file is a place holder
+
+import csv
+import os
+import xml.etree.ElementTree as ET
+
+def cot_xml(file):
+  root = ET.Element("event")
+  with open(file,'r') as file:
+    reader = csv.DictReader(file)
+    data = list(reader)
+
+  for d in data
+    T = d['time']
+    lat = ['lat']
+    long = ['long']
