@@ -2,21 +2,34 @@ import os
 import pandas as pd
 import xml.etree.ElementTree as ET
 
-def create_cot_xml(gps_file, imu_file, entity_metadata_file):
-    # Read GPS and IMU data
-    gps_data = pd.read_csv(gps_file)
-    imu_data = pd.read_csv(imu_file)
+data_directory = "C:\Users\rjz00\Downloads\stk"
 
-    # Merge GPS and IMU data using a common identifier, e.g., timestamp
-    merged_data = pd.merge(gps_data, imu_data, on="Timestamp")
+#using panda get the files that are output into this script
+gps_GV1 = pd.read_csv(GroundVehicle1_GPS.csv)
+imu_GV1 = pd.read_csv(GroundVehicle1_IMU.csv)
+MGV1 = pd.merge(gps_GV1, imu_GV1)
 
-    # Read entity metadata
-    entity_metadata = pd.read_csv(entity_metadata_file)
+gps_GV2 = pd.read_csv(GroundVehicle2_GPS.csv)
+imu_GV2 = pd.read_csv(GroundVehicle2_IMU.csv)
+MGV2 = pd.merge(gps_GV2, imu_GV2)
+
+gps_A1 = pd.read_csv(Aircraft1_GPS.csv)
+imu_A1 = pd.read_csv(Aircraft1_IMU.csv)
+MA1 = pd.merge(gps_A1, imu_A1)   
+
+gps_A2 = pd.read_csv(Aircraft2_GPS.csv)
+imu_A2 = pd.read_csv(Aircraft2_IMU.csv)
+MA2 = pd.merge(gps_A2, imu_A2)
+
+X = [MGV1,MGV2,MA1,MA2]
+
+for len(x)
 
     # Create CoT XML for each entity
     for index, row in entity_metadata.iterrows():
         entity_name = row["STK_ObjectName"]
-        cot_uuid = row["CoT_UUID"]
+        #CoT uses uid not UUID but it says its like it
+        cot_uid = row["CoT_UUID"]
         cot_type = row["CoT_Type"]
 
         # Filter data for the current entity
@@ -38,16 +51,7 @@ def create_cot_xml(gps_file, imu_file, entity_metadata_file):
         cot_xml.write(cot_xml_file, encoding="utf-8", xml_declaration=True)
         print(f"CoT XML file '{cot_xml_file}' created successfully.")
 
-# Specify the directory where your data files are located
-data_directory = "path/to/data/files"
 
-# Specify the input files for each entity
-entities = [
-    ("GroundVehicle1_GPS.csv", "GroundVehicle1_IMU.csv"),
-    ("GroundVehicle2_GPS.csv", "GroundVehicle2_IMU.csv"),
-    ("Aircraft1_GPS.csv", "Aircraft1_IMU.csv"),
-    ("Aircraft2_GPS.csv", "Aircraft2_IMU.csv"),
-]
 
 # Process each entity
 for gps_file, imu_file in entities:
