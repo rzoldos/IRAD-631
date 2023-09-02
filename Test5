@@ -1,0 +1,52 @@
+import os
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+data_directory = "C:\Users\rjz00\Downloads\stk"
+
+#using panda get the files that are output into this script
+gps_GV1 = pd.read_csv(GroundVehicle1_GPS.csv)
+imu_GV1 = pd.read_csv(GroundVehicle1_IMU.csv)
+MGV1 = pd.merge(gps_GV1, imu_GV1)
+
+gps_GV2 = pd.read_csv(GroundVehicle2_GPS.csv)
+imu_GV2 = pd.read_csv(GroundVehicle2_IMU.csv)
+MGV2 = pd.merge(gps_GV2, imu_GV2)
+
+gps_A1 = pd.read_csv(Aircraft1_GPS.csv)
+imu_A1 = pd.read_csv(Aircraft1_IMU.csv)
+MA1 = pd.merge(gps_A1, imu_A1)   
+
+gps_A2 = pd.read_csv(Aircraft2_GPS.csv)
+imu_A2 = pd.read_csv(Aircraft2_IMU.csv)
+MA2 = pd.merge(gps_A2, imu_A2)
+
+X = [MGV1,MGV2,MA1,MA2]
+
+for len(x)
+
+    # Create CoT XML for each entity
+    for index, row in entity_metadata.iterrows():
+        entity_name = row["STK_ObjectName"]
+        #CoT uses uid not UUID but it says its like it
+        cot_uid = row["CoT_UUID"]
+        cot_type = row["CoT_Type"]
+
+        # Filter data for the current entity
+        entity_data = merged_data[merged_data["Entity"] == entity_name]
+
+        # Create the CoT XML
+        root = ET.Element("event")
+        uid_element = ET.SubElement(root, "uid")
+        uid_element.text = cot_uuid
+        detail_element = ET.SubElement(root, "detail")
+        point_element = ET.SubElement(detail_element, "point")
+        point_element.attrib["lat"] = str(entity_data["Latitude"].iloc[0])
+        point_element.attrib["lon"] = str(entity_data["Longitude"].iloc[0])
+        ET.SubElement(detail_element, "ce").text = cot_type
+
+
+
+
+#end needed to convert to a xml file which can be done using ET
+cot_xml = ET.tostring(cot).decode()
