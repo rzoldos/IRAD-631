@@ -21,13 +21,15 @@ gps_A2 = pd.read_csv(Aircraft2_GPS.csv)
 imu_A2 = pd.read_csv(Aircraft2_IMU.csv)
 MA2 = pd.merge(gps_A2, imu_A2)
 
+STK_metadata = pd.read_csv(STK_Entity_Metadata.csv)
+
 X = [MGV1,MGV2,MA1,MA2]
 
 for len(x)
 
-    # Create CoT XML for each entity
-    for index, row in entity_metadata.iterrows():
-        entity_name = row["STK_ObjectName"]
+    # Spit csv metadata to files
+    for index, row in STK_metadata.iterrows():
+        STK_ObjectNam = row["STK_ObjectNam"]
         #CoT uses uid not UUID but it says its like it
         cot_uid = row["CoT_UUID"]
         cot_type = row["CoT_Type"]
@@ -35,7 +37,7 @@ for len(x)
         # Filter data for the current entity
         entity_data = merged_data[merged_data["Entity"] == entity_name]
 
-        # Create the CoT XML
+        # CoT 2 XML
         root = ET.Element("event")
         uid_element = ET.SubElement(root, "uid")
         uid_element.text = cot_uuid
