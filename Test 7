@@ -1,0 +1,49 @@
+import os
+import pandas as pd
+import xml.etree.ElementTree as ET
+
+data_directory = "C:/user/rjz00/Downloads/stk"
+
+#Here ti read the CSV into data
+gps_data = pd.read_csv('GPS.csv')
+imu_data = pd.read_csv('IMU.csv')
+metadata = pd.read_csv('STK_Entity_Metadata.csv')
+event = STK_Entity_Metadata(CoT_UUID)
+def merge_data(event)
+    entity_gps = gps_data[gps_data['STK_ObjectNam']]
+    entity_imu = imu_data[imu_data['STK_ObjectNam']]
+    entity_metadata = metadata[metadata['STK_ObjectNam']]
+
+    merge_data = pd.merge(entity_gps,entity_imu, on = 'time')
+
+    return merge_data, entity_metadata
+
+merge_data, entity_metadata = merge_data(entity_name)
+
+#generate CoT XML for event
+cot_xml = Element('event')
+cot_xml.set('version','1.0')
+
+for index, row in merge_data.iterrows():
+    #
+    event = SubElement(cot_xml, 'event')
+
+    point = SubElement(event, 'point')
+    point.set('lat',str(row['Lat']))
+    point.set('lon',str(row['Lon']))
+
+    detail = SubElement(event, 'detail')
+    orientation = SubElement(detail, 'orientation')
+    
+    heading = SubElement(orientation,'heading')
+    heading.text = str(row['Heading'])
+
+    pitch = SubElement(orientation, 'pitch')
+    pitch.text = str(row['Pitch'])
+
+    roll = SubElement(orientation, 'roll')
+    roll.text = str(row['Roll'])
+
+file_name = f'{entity_metadata}_COT.xml'
+with open(file_name, 'w') as file:
+    file.write(tostring(cot_xml, encoding = 'unicode'))
