@@ -2,14 +2,16 @@ import os
 import pandas as pd
 import xml.etree.ElementTree as ET
 
-data_directory = "C:/user/rjz00/Downloads/stk"
+#data_directory = "C:\Users\rjz00\OneDrive\Documents\Next Gen Fed\IRAD_631\STK_Reports"
 
-#Here ti read the CSV into data
-gps_data = pd.read_csv('GPS.csv')
+#Here to read the CSV into data
+gps_data = pd.read_csv('Drone_GPS_Report.csv')
 imu_data = pd.read_csv('IMU.csv')
 metadata = pd.read_csv('STK_Entity_Metadata.csv')
-event = STK_Entity_Metadata(CoT_UUID)
-def merge_data(event)
+print(imu_data)
+print(metadata)
+event = metadata(0)
+def merge_data(event):
     entity_gps = gps_data[gps_data['STK_ObjectNam']]
     entity_imu = imu_data[imu_data['STK_ObjectNam']]
     entity_metadata = metadata[metadata['STK_ObjectNam']]
