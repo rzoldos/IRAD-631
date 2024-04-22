@@ -1,0 +1,44 @@
+import pandas as pd
+from pyTAK.types import CoT, Point, Detail, Orientation
+from pyTAK.constants import EventType
+
+# Read data from CSV files
+gps_data = pd.read_csv('Drone_GPS_Report.csv')
+imu_data = pd.read_csv('IMU.csv')
+metadata = pd.read_csv('STK_Entity_Metadata.csv')
+
+# Function to merge data
+def merge_data(entity_name):
+    entity_gps = gps_data[gps_data['STK_ObjectNam'] == entity_name]
+    entity_imu = imu_data[imu_data['STK_ObjectNam'] == entity_name]
+
+    merge_data = pd.merge(entity_gps, entity_imu, on='time')
+
+    return merge_data
+
+# Iterate through events in metadata
+for index, event_row in metadata.iterrows():
+    entity_name = event_row['STK_ObjectNam']
+    merge_data_df = merge_data(entity_name)
+
+    # Create CoT object
+    cot = CoT()
+
+    # Add points to CoT
+    for _, row in merge_data_df.iterrows():
+        point = Point(row['Lat'], row['Lon'])
+        detail = Detail()
+        orientation = Orientation(row['Heading'], row['Pitch'], row['Roll'])
+        detail.orientation = orientation
+        cot.add_point(point, detail)
+
+    # Set event type
+    cot.event_type = EventType.ENTITY_STATE
+
+    # Generate CoT XML filename
+    file_name = f"{entity_name}_COT.xml"
+
+    # Write CoT XML to file
+    with open(file_name, 'w') as f:
+        f.write(cot.to_xml())
+
