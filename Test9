@@ -1,0 +1,40 @@
+import pytak
+import csv
+
+def create_cot_pli_files(input_file, output_directory):
+    # Read position and orientation data from the input CSV file
+    with open(input_file, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            # Extract object information from each row
+            name = row['Name']
+            lat = float(row['Latitude'])
+            lon = float(row['Longitude'])
+            alt = float(row['Altitude'])
+            heading = float(row['Heading'])
+            pitch = float(row['Pitch'])
+            roll = float(row['Roll'])
+
+            # Create a new Cursor on Target (COT) object for Point of Interest (PLI)
+            cot_object = pytak.CotEvent()
+            cot_object.uid = name  # Use the object name as the unique identifier
+            cot_object.type = 'a-f-G-U-C'  # Type for Point of Interest (PLI)
+            cot_object.how = {'a': 'h-g-i-g-o', 'c': 'u'}
+            cot_object.point = (lon, lat, alt)
+            cot_object.detail = {'uid': name, 'type': 'a-f-G-U-C', 'lat': lat, 'lon': lon, 'hae': alt,
+                                 'how': {'a': heading, 'c': 'u'}}
+            cot_object.stale = 60  # Stale time in seconds (1 minute)
+
+            # Save the COT message to a PLI file
+            output_file = f'{output_directory}/{name}.cot'
+            with open(output_file, 'w') as outfile:
+                outfile.write(cot_object.to_xml())
+
+            print(f"Generated COT PLI file: {output_file}")
+
+# Example usage
+input_csv_file = 'stk_data.csv'  # Path to CSV file containing STK data
+output_directory = 'cot_pli_files'  # Directory to save generated COT PLI files
+
+# Create COT PLI files based on STK data
+create_cot_pli_files(input_csv_file, output_directory)
