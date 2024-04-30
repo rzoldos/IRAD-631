@@ -1,0 +1,90 @@
+import pytak
+import csv
+import numpy as np
+
+def skew_Zoldos(q_v):
+    return np.array([[0, -q_v[2], q_v[1]],
+                     [q_v[2], 0, -q_v[0]],
+                     [-q_v[1], q_v[0], 0]])
+
+def q_to_Euler_Zoldos(q):
+    I = np.eye(3)
+    q_v = np.array([q[1], q[2], q[3]])
+    q_s = q[0]
+    R = (((q_s**2) - (q_v.T @ q_v)) * I) - (2 * q_s * skew_Zoldos(q_v)) + (2 * q_v @ q_v.T)
+
+    theta = np.array([0, 0, 0])
+    # Sequence == 321
+    theta[1] = np.arcsin(-R[0, 2])
+    theta[0] = np.arcsin(R[0, 1] / np.cos(theta[1]))
+    theta[2] = np.arcsin(R[1, 2] / np.cos(theta[1]))
+    theta = np.rad2deg(theta)
+    return theta
+
+def create_cot_file(gps_file, imu_file, target_name, output_directory):
+    # Initialize variables to store COT events
+    cot_events = []
+
+    # Read GPS data from the GPS CSV file
+    with open(gps_file, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            # Extract GPS data for the specified target
+            if row['Time (EpSec)']:  # Assuming there's a 'Time' column in GPS data
+                time = row['Time (EpSec)']
+                lat = float(row["Lat (deg)"])
+                lon = float(row["Lon (deg)"])
+                alt = float(row["Alt (m)"])
+
+                # Create a new Cursor on Target (COT) event for Point of Interest (PLI)
+                cot_object = pytak.CotEvent()
+                cot_object.uid = f"{target_name}_{time}"  # Unique identifier based on time
+                cot_object.type = 'a-f-G-U-C'
+                cot_object.how = {'a': 0, 'c': 'u'}  # Dummy orientation (0 degrees)
+                cot_object.point = (lon, lat, alt)
+                cot_object.stale = 60  # Stale time in seconds (1 minute)
+
+                # Append the COT event to the list
+                cot_events.append(cot_object)
+
+    # Read IMU data from the IMU CSV file
+
+    # Read IMU data from the IMU CSV file for the specified target
+    with open(imu_file, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row['Name'] == target_name:
+                # Refer to code at top for q to Euler
+
+
+
+
+
+                heading = theta[0]
+                pitch = theta[1]
+                roll = theta[2]
+                time = row['Time']  # Assuming 'Time' column exists in IMU data
+
+                # Find corresponding COT event based on time
+                for cot_event in cot_events:
+                    if cot_event.uid.endswith(time):
+                        # Update the COT event with IMU data (orientation)
+                        cot_event.how = {'a': heading, 'c': 'u'}
+                        break
+
+    # Save each COT event to a PLI file
+    for cot_event in cot_events:
+        output_file = f"{output_directory}/{cot_event.uid}.cot"
+        with open(output_file, 'w') as outfile:
+            outfile.write(cot_event.to_xml())
+        print(f"Generated COT PLI file: {output_file}")
+
+# Example usage
+#gps_csv_file = 'GPS.csv'  # Path to CSV file containing GPS data
+#imu_csv_file = 'IMU.csv'  # Path to CSV file containing IMU data
+#target_name = 'Ground Vehicle'  
+#output_directory = 'cot_file'
+
+# Create COT PLI files for the specified target over time
+#create_cot_pli_files(gps_csv_file, imu_csv_file, target_name, output_directory)
+create_cot_file('GPS.csv', 'IMU.csv', 'GV', 'cot_file')
