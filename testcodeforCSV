@@ -1,0 +1,19 @@
+import csv
+import itertools
+with open('GPS.csv', newline='') as f:
+    reader = csv.reader(f)
+    w = []
+    for row in reader:
+        w.extend(row)
+# Change i to change colomn (time lat lon alt)
+i = 0
+while i < len(w):
+    print(w[i])
+    i=i+4
+
+
+
+
+print(i)
+print(len(w))
+print(w[1])
